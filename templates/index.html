@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head> 
+<body>
+    <form method="POST">
+        <p>Stock Ticker:</p>
+        <input type = "tick" name="tick">
+        <p>Date </p>
+        <input type = "date" name="date">
+        <p>Shares</p>
+        <input type = "shares" name="shares">
+        <button type = "submit">Submit</button>
+    </form>
+    <br>
+    {% for transaction in transactions %}
+        <li>{{transaction}}</li>
+    {% endfor %}    
+
+    <h2>Image:</h2>
+    {% if ifGraph %}
+        <img src="/static/stock.jpg">
+    {% endif %}
+</body>
+</html>
