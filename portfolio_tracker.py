@@ -70,7 +70,7 @@ class Stock:
         else:
             price = float(self.data.iloc[-1][3])   
 
-        return price * self.getShares()
+        return price * self.getShares(date)
 
     def netProfit(self, date=None) -> float:
         """
@@ -80,7 +80,7 @@ class Stock:
 
         investments = 0
 
-        for v in self.getPurchasePrices():
+        for v in self.getPurchasePrices(date):
             investments += v
 
         return self.getPriceAtDate(date) - investments # Current total value of stocks - Total invested initially 
@@ -91,11 +91,19 @@ class Stock:
         """
         self.date_shares.append((dt.strptime(date, "'%Y-%m-%d'"), num_shares))
     
-    def getShares(self) -> float:
+    def getShares(self, date: object=None) -> float:
         """
-        Returns the total number of shares of this stock. 
+        Returns the total number of shares of this stock before or on given date. 
         """
-        return sum([share_count for _, share_count in self.date_shares])
+        if date:
+            shares = []
+            for d, share_count in self.date_shares:
+                if d <= date:
+                    shares.append(share_count)
+            return sum(shares)
+        
+        else:
+            return sum([share_count for d, share_count in self.date_shares])
     
     def getDates(self) -> List[object]:
         """
@@ -332,7 +340,9 @@ pf = Portfolio()
 
 pf.add_Stock("AAPL", "2024-04-30", 1)
 
-pf.add_Stock("AMZN", "2023-01-01", 1)
+pf.add_Stock("AAPL", "2023-05-31", 1)
+
+print(pf.get_stock("AAPL").profitsData())
 
 
 # df = yf.download("AAPL")
