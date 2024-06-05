@@ -14,7 +14,13 @@ import seaborn as sns
 from datetime import timedelta, datetime as dt
 from modeling import get_Predictions
 from typing import List, Dict, Tuple, Union, Optional, Any, Callable, Iterable
-from plotnine import ggplot, geom_bar
+from plotnine import ggplot, geom_bar, geom_line, aes, labs, ggsave
+import bokeh
+from bokeh.plotting import figure, show, output_file, save
+from bokeh.embed import server_document, file_html, json_item, components
+from bokeh.resources import CDN
+import json
+
 
 class Stock:
     def __init__(self, ticker: str, date_shares: List[Tuple[object, float]], data: object):
@@ -190,10 +196,6 @@ class Portfolio:
 
         stock.visualize_Stock()
 
-        print("Before")
-        print(stock.profitsData())
-        print("After")
-
         self.stock_list.append(stock)
 
         self.transactions.append(str(stock))
@@ -242,6 +244,27 @@ class Portfolio:
 
     #Visualizes the total profit from this portfolio over time (starting from earliest stock in portfolio)
     def visualize_Profits(self):
+        all_profits = pd.DataFrame(data = {"Date":[]})
+
+        for stock in self.stock_list:
+            data = stock.profitsData()
+
+            all_profits = pd.merge(all_profits, data, how = "outer", on="Date", suffixes=(None, f"_{stock.ticker}"))
+
+        all_profits["Total_Profit"] = all_profits.sum(axis = 1, numeric_only=True, skipna=True)
+
+        p1 = figure(title="Total Profits Over Time", x_axis_label="Date", y_axis_label="Total Profit", x_axis_type="datetime")
+        p1.line(x=all_profits["Date"], y=all_profits["Total_Profit"])
+
+        script, div = components(p1)
+
+        return script, div
+
+        # plot = (ggplot(all_profits, aes(x = "Date", y = "Total_Profit")) +
+        #         geom_line() + labs(title = "Total Profits Ove`r Time"))
+        
+        # ggsave(plot, filename=r"C:\Users\stano\Documents\Projects\Stock Portfolio\static\total_profit.jpg")
+
         # profits_df = pd.DataFrame()
         # for i, stock in enumerate(self.stock_list):
         #     dat = stock.data
@@ -267,7 +290,8 @@ class Portfolio:
         # plt.savefig("Portfolio_Profits.jpg")
         # plt.show()
 
-        pass
+        #pass
+
 
     def graphLine():
         pass
@@ -336,13 +360,23 @@ def run():
 
     pf.process_Request()
 
-pf = Portfolio()
+# pf = Portfolio()
 
-pf.add_Stock("AAPL", "2024-04-30", 1)
+# pf.add_Stock("AAPL", "2024-04-30", 1)
 
-pf.add_Stock("AAPL", "2023-05-31", 1)
+# pf.add_Stock("AAPL", "2023-05-31", 1)
 
-print(pf.get_stock("AAPL").profitsData())
+# pf.add_Stock("AMZN", "2022-02-01", 1)
+
+# pf.visualize_Profits()
+# aapl = pf.get_stock("AAPL").profitsData()
+# amzn = pf.get_stock("AMZN").profitsData()
+
+# print(aapl)
+# print(amzn)
+
+# print(pd.merge(aapl, amzn, how = "outer", on="Date", suffixes=("AAPL", "AMZN")))
+
 
 
 # df = yf.download("AAPL")

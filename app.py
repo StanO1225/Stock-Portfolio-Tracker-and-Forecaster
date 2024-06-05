@@ -11,6 +11,8 @@ pf = pt.Portfolio()
 @app.route("/", methods=["GET", "POST"])
 def main():
     hasGraph = False
+    script = None
+    div = None
 
     if request.method == 'POST':
         data = request.form
@@ -20,10 +22,11 @@ def main():
         shares = float(data["shares"])
 
         pf.add_Stock(tick, date, shares)
-        hasGraph = True
-
         
+        script, div = pf.visualize_Profits()
 
-    return render_template("index.html", transactions= pf.getTransactions(), ifGraph = hasGraph)
+        hasGraph = True
+    
+    return render_template("index.html", transactions=pf.getTransactions(), ifGraph = hasGraph, script=script, line_div=div, bar_div = )
 
-app.run(host = "0.0.0.0", port = 80)
+app.run(host = "0.0.0.0", port = 8000)

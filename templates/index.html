@@ -3,6 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Tracker</title>
+
+    <script src="https://cdn.bokeh.org/bokeh/release/bokeh-3.4.1.min.js"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.bokeh.org/bokeh/release/bokeh-widgets-3.4.1.min.js"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.bokeh.org/bokeh/release/bokeh-tables-3.4.1.min.js"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.bokeh.org/bokeh/release/bokeh-gl-3.4.1.min.js"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.bokeh.org/bokeh/release/bokeh-mathjax-3.4.1.min.js"
+        crossorigin="anonymous"></script>
+        
+    {{ script|safe }}
+    
 </head> 
 <body>
     <form method="POST">
@@ -15,13 +30,14 @@
         <button type = "submit">Submit</button>
     </form>
     <br>
+
     {% for transaction in transactions %}
         <li>{{transaction}}</li>
     {% endfor %}    
 
-    <h2>Image:</h2>
-    {% if ifGraph %}
-        <img src="/static/stock.jpg">
-    {% endif %}
+    <h2>Total Profits Over Time:</h2>
+
+    <div> {{ div|safe }} </div>
+
 </body>
 </html>
