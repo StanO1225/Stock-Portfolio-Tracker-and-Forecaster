@@ -3,20 +3,20 @@ import portfolio_tracker as pt
 import yfinance as yf
 
 global pf 
-global hasGraph
 
 app = Flask(__name__)
-pf = pt.Portfolio()
 
 @app.route("/", methods=["GET", "POST"])
 def main():
-    hasGraph = False
-    script = None
-    div = None
+    pf = pt.Portfolio()
+    script = ""
+    plot1 = ""
+    plot2=""    
+    marketVal = 0
 
     if request.method == 'POST':
         data = request.form
-        print(data)
+        
         tick = data["tick"].upper()
         date = data["date"]
         shares = float(data["shares"])
@@ -25,8 +25,9 @@ def main():
         
         script, div = pf.visualize_Profits()
 
-        hasGraph = True
+        plot1 = div["Profit Line"]
+        plot2 = div["Investment History"]
     
-    return render_template("index.html", transactions=pf.getTransactions(), ifGraph = hasGraph, script=script, line_div=div, bar_div = )
+    return render_template("index.html", transactions=pf.getTransactions(), script=script, line_div=plot1, varea=plot2, marketVal=marketVal)
 
-app.run(host = "0.0.0.0", port = 8000)
+app.run(host = "0.0.0.0", port = 8000, debug=True)

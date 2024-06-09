@@ -8,6 +8,7 @@ Stock portfolio tracker with visualization and predictive capabilities.
 #Import statements
 import yfinance as yf
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import seaborn as sns
@@ -19,7 +20,8 @@ import bokeh
 from bokeh.plotting import figure, show, output_file, save
 from bokeh.embed import server_document, file_html, json_item, components
 from bokeh.resources import CDN
-import json
+from bokeh.palettes import Light, tol, viridis  
+from bokeh.models import DatetimeTickFormatter, NumeralTickFormatter, ColumnDataSource, BoxAnnotation
 
 
 class Stock:
@@ -64,7 +66,7 @@ class Stock:
 
         return res
 
-    def getPriceAtDate(self, date=None) -> List[float]:
+    def getPriceAtDate(self, date=None) -> float:
         """
         Gets current total price of the stock at a given date. 
         """
@@ -156,6 +158,9 @@ class Portfolio:
         # self.inactive_stocks = []
         self.transactions = transactions # List of transactions 
         self.net_worth = net_worth # Total assets invested in the portfolio 
+    
+    def to_list(self):
+        return [s.ticker for s in self.stock_list]
 
     # Input: Stock Ticker 
     # Return None if stock is not in portfolio
@@ -245,53 +250,46 @@ class Portfolio:
     #Visualizes the total profit from this portfolio over time (starting from earliest stock in portfolio)
     def visualize_Profits(self):
         all_profits = pd.DataFrame(data = {"Date":[]})
+        stock_values = pd.DataFrame(data = {"Date":[]})
 
         for stock in self.stock_list:
-            data = stock.profitsData()
+            profit_data = stock.profitsData()
 
-            all_profits = pd.merge(all_profits, data, how = "outer", on="Date", suffixes=(None, f"_{stock.ticker}"))
+            stock_data = pd.DataFrame(stock.data.reset_index(inplace = False)["Date"])
+            stock_data = stock_data[stock_data["Date"] >= min(stock.getDates())]
+            stock_data[stock.ticker] = stock_data["Date"].apply(stock.getPriceAtDate)
+
+            all_profits = pd.merge(all_profits, profit_data, how = "outer", on="Date", suffixes=(None, f"_{stock.ticker}"))
+            stock_values = pd.merge(stock_values, stock_data, how = "outer", on = "Date", suffixes=(None, f"_{stock.ticker}"))
 
         all_profits["Total_Profit"] = all_profits.sum(axis = 1, numeric_only=True, skipna=True)
+        stock_values = stock_values.replace(np.nan, 0)        
 
+        # p1_colors = ["green" if p >= 0 else "red" for p in all_profits["Total_Profit"]]
+        low_box = BoxAnnotation(top = 0, fill_alpha=0.15, fill_color="red")
+        high_box = BoxAnnotation(bottom = 0, fill_alpha = 0.15, fill_color="green")
         p1 = figure(title="Total Profits Over Time", x_axis_label="Date", y_axis_label="Total Profit", x_axis_type="datetime")
         p1.line(x=all_profits["Date"], y=all_profits["Total_Profit"])
 
-        script, div = components(p1)
+        p1.yaxis[0].formatter = NumeralTickFormatter(format="$0")
+        p1.xaxis[0].formatter = DatetimeTickFormatter(months="%b %Y")
+
+        p1.add_layout(low_box)
+        p1.add_layout(high_box)
+
+        p2 = figure(title = "Investment History", x_axis_label = "Date", y_axis_label = "Portfolio Value", x_axis_type = "datetime")
+        p2.varea_stack(stackers = stock_values.drop(columns=["Date"]).columns, x = "Date", color = viridis(len(self.stock_list)), legend_label= self.to_list(), source=stock_values)
+
+        p2.yaxis[0].formatter = NumeralTickFormatter(format="$0")
+        p2.xaxis[0].formatter = DatetimeTickFormatter(months="%b %Y")
+        p2.legend.orientation = "horizontal"
+
+        p3 = figure(x_range = self.to_list(), title="Portfolio Performance")
+        p3.vbar(x="")
+
+        script, div = components({"Profit Line" : p1, "Investment History" : p2})
 
         return script, div
-
-        # plot = (ggplot(all_profits, aes(x = "Date", y = "Total_Profit")) +
-        #         geom_line() + labs(title = "Total Profits Ove`r Time"))
-        
-        # ggsave(plot, filename=r"C:\Users\stano\Documents\Projects\Stock Portfolio\static\total_profit.jpg")
-
-        # profits_df = pd.DataFrame()
-        # for i, stock in enumerate(self.stock_list):
-        #     dat = stock.data
-        #     stock_profits = dat[stock.date_added : dt.now()].drop(dat.columns.difference(['Close']), axis=1)
-        #     stock_profits.columns = [stock.ticker]
-        #     stock_profits[stock.ticker] = (stock_profits[stock.ticker]*float(stock.share_count) - stock.get_Start_Value()) 
-        #     if i == 0:
-        #         profits_df = stock_profits
-        #     else:
-        #         if len(profits_df.index) < len(stock_profits.index):
-        #             profits_df = stock_profits.join(profits_df, on=stock_profits.index)
-        #         else:
-        #             profits_df = profits_df.join(stock_profits, on=profits_df.index)
-        # profits_df['Total Profits'] = profits_df.sum(axis=1, numeric_only=True)
-        # profits_df['Positive?'] = profits_df['Total Profits'] >= 0
-        # print(profits_df)
-        
-        # plt.style.use('ggplot')
-        # plt.figure(figsize=(16,12))
-        # plt.title("Portfolio Net Profit by Time")
-        # graph_ = sns.lineplot(data=profits_df, x=profits_df.index, y="Total Profits", c='Green')
-        # graph_.xaxis.set_major_locator(ticker.LinearLocator(5))
-        # plt.savefig("Portfolio_Profits.jpg")
-        # plt.show()
-
-        #pass
-
 
     def graphLine():
         pass

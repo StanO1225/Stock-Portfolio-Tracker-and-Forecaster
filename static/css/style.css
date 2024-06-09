@@ -1,0 +1,81 @@
+.title
+{
+    background-color: aquamarine;
+    font-size: 60px;
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold; 
+    text-align: center; 
+    font-style: normal; 
+    font-variant: normal; 
+}
+
+
+.container
+{
+    display: flex;
+    padding: 5px;
+    justify-content: space-around;
+}
+
+.response_box
+{
+    float: right
+}
+
+.p1, .p2
+{
+    border: 1px solid;
+}
+
+.VSpace, HSpace
+{
+    border: 0px;
+    float: left;
+}
+
+.p1
+{
+    float: left;
+    width: 49%;
+}
+
+.p2
+{
+    float: right;
+    width: 49%;
+}
+
+.p2
+{
+    float:right;
+}
+
+.metricHead
+{
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold; 
+    font-size: 14px; 
+    text-align: left; 
+    font-style: normal; 
+    font-variant: normal; 
+}
+
+.metricStat
+{
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold; 
+    font-size: 30   px; 
+    text-align: center; 
+    font-style: normal; 
+    font-variant: normal; 
+}
+
+.box
+{
+    background-color: grey; 
+    width: 300px; 
+    height: 200px; 
+    margin: auto; 
+    font-size: 30px; 
+    text-align: center; 
+}

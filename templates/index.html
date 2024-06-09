@@ -17,27 +17,67 @@
         crossorigin="anonymous"></script>
         
     {{ script|safe }}
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css')}}" type="text/css">
     
 </head> 
-<body>
+<body style="background-color: #d3d3d3;">
+    <div class="title"> 
+        Stock Portfolio Tracker
+    </div>
     <form method="POST">
-        <p>Stock Ticker:</p>
-        <input type = "tick" name="tick">
-        <p>Date </p>
-        <input type = "date" name="date">
-        <p>Shares</p>
-        <input type = "shares" name="shares">
-        <button type = "submit">Submit</button>
+        <div class = "container">
+            <div>
+                <p>
+                    Stock Ticker: <input type = "tick" name="tick"> 
+                </p>
+                
+            </div>
+            <div>
+                <p>
+                    Date <input type = "date" name="date"> 
+                </p>
+            </div>
+            <div>
+                <p>
+                    Shares <input type = "shares" name="shares">
+                </p>
+                
+            </div>
+
+            <button type = "submit">Add Stock</button>
+        </div>
     </form>
     <br>
 
-    {% for transaction in transactions %}
-        <li>{{transaction}}</li>
-    {% endfor %}    
+    <div class="container">
+        <div class="box">
+            <div class="metricHead"> Portfolio Market Value: </div>
+        </div>
+        
+        <div class="box">
+            <div class="metricHead"> Unique Stocks: </div>
+            <div class="metric"> 
+                {{ marketVal }}
+            </div>
+        </div>
+    
+        <div class="box">
+            <div class="metricHead"> Daily Change: </div>
+        </div>
+    </div>
+
 
     <h2>Total Profits Over Time:</h2>
 
-    <div> {{ div|safe }} </div>
+    <div class="p1"> {{ line_div | safe }} </div>
+
+    <div class="p2"> {{ varea | safe }} </div>
+
+
+    {% for transaction in transactions %}
+    <li>{{transaction}}</li>
+    {% endfor %}   
 
 </body>
 </html>
