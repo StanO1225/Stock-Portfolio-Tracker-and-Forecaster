@@ -11,7 +11,8 @@ def main():
     pf = pt.Portfolio()
     script = ""
     plot1 = ""
-    plot2=""    
+    plot2=""
+    plot3=""    
     marketVal = 0
 
     if request.method == 'POST':
@@ -27,7 +28,9 @@ def main():
 
         plot1 = div["Profit Line"]
         plot2 = div["Investment History"]
+        plot3 = div["Portfolio Performance"]
+
     
-    return render_template("index.html", transactions=pf.getTransactions(), script=script, line_div=plot1, varea=plot2, marketVal=marketVal)
+    return render_template("index.html", transactions=pf.getTransactions(), script=script, line_div=plot1, varea=plot2, pie= plot3, marketVal=marketVal, numStocks=pf.numStocks())
 
 app.run(host = "0.0.0.0", port = 8000, debug=True)

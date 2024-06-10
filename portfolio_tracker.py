@@ -21,7 +21,9 @@ from bokeh.plotting import figure, show, output_file, save
 from bokeh.embed import server_document, file_html, json_item, components
 from bokeh.resources import CDN
 from bokeh.palettes import Light, tol, viridis  
-from bokeh.models import DatetimeTickFormatter, NumeralTickFormatter, ColumnDataSource, BoxAnnotation
+from bokeh.models import DatetimeTickFormatter, NumeralTickFormatter, ColumnDataSource, BoxAnnotation, LabelSet
+from bokeh.transform import cumsum
+from math import pi
 
 
 class Stock:
@@ -158,9 +160,16 @@ class Portfolio:
         # self.inactive_stocks = []
         self.transactions = transactions # List of transactions 
         self.net_worth = net_worth # Total assets invested in the portfolio 
-    
+    def numStocks(self):
+        return len(self.to_list())
+
     def to_list(self):
-        return [s.ticker for s in self.stock_list]
+        stocks = []
+        
+        for s in self.stock_list:
+            if s.ticker not in stocks:
+                stocks.append(s.ticker)
+        return stocks
 
     # Input: Stock Ticker 
     # Return None if stock is not in portfolio
@@ -260,12 +269,36 @@ class Portfolio:
             stock_data[stock.ticker] = stock_data["Date"].apply(stock.getPriceAtDate)
 
             all_profits = pd.merge(all_profits, profit_data, how = "outer", on="Date", suffixes=(None, f"_{stock.ticker}"))
-            stock_values = pd.merge(stock_values, stock_data, how = "outer", on = "Date", suffixes=(None, f"_{stock.ticker}"))
+            stock_values = pd.merge(stock_values, stock_data, how = "outer", on = "Date", suffixes=(None, f".{stock.ticker}"))
+            stock_values[stock.ticker] = stock_values.filter(like=stock.ticker).sum(axis=1)
 
         all_profits["Total_Profit"] = all_profits.sum(axis = 1, numeric_only=True, skipna=True)
-        stock_values = stock_values.replace(np.nan, 0)        
+        stock_values = stock_values.replace(np.nan, 0)    
+        stock_values = stock_values.drop(columns=stock_values.filter(like='.').columns)
+        
+        stock_recents = stock_values.drop(columns="Date").iloc[-1]
+        pf_total = stock_recents.sum()
 
-        # p1_colors = ["green" if p >= 0 else "red" for p in all_profits["Total_Profit"]]
+        stock_pct = stock_recents / pf_total
+
+        stock_pct = stock_pct.reset_index(name="Value").rename(columns={'index' : 'Stock'})
+
+        stock_pct['Angle'] = stock_pct['Value'] * 2 * pi
+        stock_pct['Color'] = viridis(len(self.to_list()))
+
+        format = lambda x: f"{x * 100:.1f} %"
+        stock_pct['Value_str'] = stock_pct['Value'].map(format)
+        stock_pct['Value_str'] = stock_pct['Value_str'].str.pad(20, side="left")
+        pct_cds = ColumnDataSource(stock_pct)
+
+        print(stock_pct)
+
+        # stocks_profit_pct = pd.DataFrame()
+        # for stock in self.stock_list:
+        #     stocks_profit_pct[stock.ticker] = stock_recents[stock.ticker] / stock_recents["Total Value"]
+
+        # stocks_profit_pct = ColumnDataSource(stocks_profit_pct)
+
         low_box = BoxAnnotation(top = 0, fill_alpha=0.15, fill_color="red")
         high_box = BoxAnnotation(bottom = 0, fill_alpha = 0.15, fill_color="green")
         p1 = figure(title="Total Profits Over Time", x_axis_label="Date", y_axis_label="Total Profit", x_axis_type="datetime")
@@ -278,16 +311,23 @@ class Portfolio:
         p1.add_layout(high_box)
 
         p2 = figure(title = "Investment History", x_axis_label = "Date", y_axis_label = "Portfolio Value", x_axis_type = "datetime")
-        p2.varea_stack(stackers = stock_values.drop(columns=["Date"]).columns, x = "Date", color = viridis(len(self.stock_list)), legend_label= self.to_list(), source=stock_values)
+        p2.varea_stack(stackers = stock_values.drop(columns=["Date"]).columns, x = "Date", color = viridis(len(self.to_list())), legend_label= self.to_list(), source=stock_values)
 
         p2.yaxis[0].formatter = NumeralTickFormatter(format="$0")
         p2.xaxis[0].formatter = DatetimeTickFormatter(months="%b %Y")
         p2.legend.orientation = "horizontal"
 
-        p3 = figure(x_range = self.to_list(), title="Portfolio Performance")
-        p3.vbar(x="")
+        p3 = figure(x_range = (-0.5, 1.0), title="Portfolio Performance", tools="hover", tooltips = "@Stock: @Value")
+        p3.wedge(x = 0, y = 1, radius=0.4, start_angle=cumsum('Angle', include_zero=True), end_angle = cumsum('Angle'), line_color="white", fill_color="Color", source=stock_pct, legend_field="Stock")
 
-        script, div = components({"Profit Line" : p1, "Investment History" : p2})
+        labels = LabelSet(x=0, y=1, text='Value_str', angle=cumsum('Angle', include_zero=True), source=pct_cds)
+
+        p3.add_layout(labels)
+        p3.axis.axis_label=None
+        p3.axis.visible=False
+        p3.grid.grid_line_color=None
+
+        script, div = components({"Profit Line" : p1, "Investment History" : p2, "Portfolio Performance" : p3})
 
         return script, div
 
