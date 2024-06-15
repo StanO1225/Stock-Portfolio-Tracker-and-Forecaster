@@ -1,20 +1,38 @@
-.title
+.body
 {
-    background-color: aquamarine;
-    font-size: 60px;
-    font-family: 'Courier New', Courier, monospace;
-    font-weight: bold; 
-    text-align: center; 
-    font-style: normal; 
-    font-variant: normal; 
+    margin:0px;
+    padding:0px;
+    background-color: #E8F0FF;
 }
 
+.title
+{
+    background-color: white;
+    font-size: 20px;
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold; 
+    text-align: left; 
+    font-style: normal; 
+    font-variant: normal; 
+    box-shadow: 3px 3px 5px;
+    height: 30px
+}
 
-.container
+.container_h
+{
+    margin: 10px;
+    display: flex;
+    padding: 5px;
+    justify-content: space-around;
+    flex-direction: row;
+}
+
+.container_v
 {
     display: flex;
     padding: 5px;
     justify-content: space-around;
+    flex-direction: column;
 }
 
 .response_box
@@ -22,9 +40,9 @@
     float: right
 }
 
-.p1, .p2
+.p1, .p2, .p3, .p4, .p5
 {
-    border: 1px solid;
+    border: 0px solid;
 }
 
 .VSpace, HSpace
@@ -36,46 +54,80 @@
 .p1
 {
     float: left;
-    width: 49%;
 }
 
 .p2
 {
     float: right;
-    width: 49%;
 }
 
-.p2
+.p3
 {
-    float:right;
+    float:left;
 }
+.p4
+{
+    overflow-y: auto;
+    height: 200px;
+}
+
 
 .metricHead
 {
     font-family: 'Courier New', Courier, monospace;
     font-weight: bold; 
     font-size: 14px; 
-    text-align: left; 
+    text-align: center; 
     font-style: normal; 
     font-variant: normal; 
+    color: grey;
 }
 
 .metricStat
 {
     font-family: 'Courier New', Courier, monospace;
     font-weight: bold; 
-    font-size: 30   px; 
+    font-size: 40px; 
     text-align: center; 
     font-style: normal; 
     font-variant: normal; 
+    padding-top: 40px;
 }
 
-.box
+.metricBox
 {
-    background-color: grey; 
-    width: 300px; 
+    border-radius: 25px;
+    background-color: white; 
+    width: 200px; 
     height: 200px; 
     margin: auto; 
     font-size: 30px; 
     text-align: center; 
+}
+
+.submit
+{
+    background-color: #5F8575;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.5s;
+    box-sizing: content-box;
+    height: 30px;
+
+}
+
+.triangle-green {
+	width: 0;
+	height: 0;
+	border-left: 14px solid transparent;
+	border-right: 14px solid transparent;
+	border-bottom: 28px solid green;
+}
+
+.triangle-red{
+	width: 0;
+	height: 0;
+	border-left: 25px solid transparent;
+	border-right: 25px solid transparent;
+	border-bottom: 50px solid red;
 }

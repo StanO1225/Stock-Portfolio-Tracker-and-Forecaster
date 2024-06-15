@@ -21,12 +21,14 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css')}}" type="text/css">
     
 </head> 
-<body style="background-color: #d3d3d3;">
+<body class="body">
     <div class="title"> 
         Stock Portfolio Tracker
+        <button type="submit"></button>
     </div>
+
     <form method="POST">
-        <div class = "container">
+        <div class = "container_h">
             <div>
                 <p>
                     Stock Ticker: <input type = "tick" name="tick"> 
@@ -45,40 +47,92 @@
                 
             </div>
 
-            <button type = "submit">Add Stock</button>
+            <button class="submit" type = "submit">Add</button>
         </div>
     </form>
-    <br>
 
-    <div class="container">
-        <div class="box">
-            <div class="metricHead"> Portfolio Market Value: </div>
-        </div>
-        
-        <div class="box">
-            <div class="metricHead"> Unique Stocks: </div>
-            <div class="metric"> 
-                {{ numStocks }}
-            </div>
+    {% if numStocks == 0 %}
+        <div>
+            Please enter a stock to get started!
         </div>
     
-        <div class="box">
-            <div class="metricHead"> Daily Change: </div>
+    {% elif error != "" %}
+        <div>
+            An error occurred when processing your request. Please make sure you entered all the specified fields with a real stock ticker, past date, and share count. 
         </div>
-    </div>
 
-    <div> {{ pie | safe }} </div>
+    {% else %}
+        <div class="container_h">
+            <div class="metricBox">
+                <div class="metricHead"> Portfolio Value </div>
+                <div class="metricStat">
+                    &#36; {{ marketVal }}
+                </div>
+            </div>
+            
+            <div class="metricBox">
+                <div class="metricHead"> Unique Stocks </div>
+                <div class="metricStat"> 
+                    {{ numStocks }}
+                </div>
+            </div>
+        
+            <div class="metricBox">
+                <div class="metricHead"> (ROI) </div>
+                <div class="metricStat">
+                    {{ netChange }}
+                </div>
+            </div>
 
-    <h2>Total Profits Over Time:</h2>
+            <div class="metricBox">
+                <div class="metricHead"> Daily Change </div>
+                <div class="metricStat">
+                    {{ dayChange }}
+                </div>
+                
+                <div class="triangle-green"> </div>
+            </div>
+            
 
-    <div class="p1"> {{ line_div | safe }} </div>
+            <div class="metricBox"> 
+    
+            </div>
+        </div>
+        
 
-    <div class="p2"> {{ varea | safe }} </div>
+        <div class="container_h">
+            <div class="container_v">
+                <div class="p4">
+                    {{ table | safe }}
+                </div>
+    
+                <div class="p5">
+                    {{ bar | safe}}
+                </div>
+            </div>
 
+            <div class="p2"> 
+                {{ varea | safe }} 
+            </div>
+        </div>
 
-    {% for transaction in transactions %}
-    <li>{{transaction}}</li>
-    {% endfor %}   
+        <div class="container_h">
+            <div class="p1"> 
+                {{ line_div | safe }} 
+            </div>
 
+            <div class="p3"> 
+                {{ pie | safe }} 
+            </div>
+
+        </div>
+
+        <!-- {% for transaction in transactions %}
+        <li>{{transaction}}</li>
+        {% endfor %}    -->
+
+    {% endif %}
+
+   
 </body>
 </html>

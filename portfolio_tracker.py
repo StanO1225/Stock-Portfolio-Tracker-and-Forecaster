@@ -21,7 +21,8 @@ from bokeh.plotting import figure, show, output_file, save
 from bokeh.embed import server_document, file_html, json_item, components
 from bokeh.resources import CDN
 from bokeh.palettes import Light, tol, viridis  
-from bokeh.models import DatetimeTickFormatter, NumeralTickFormatter, ColumnDataSource, BoxAnnotation, LabelSet
+from bokeh.models import DatetimeTickFormatter, NumeralTickFormatter, ColumnDataSource, BoxAnnotation, LabelSet, InlineStyleSheet
+from bokeh.models.widgets import DataTable, DateFormatter, TableColumn
 from bokeh.transform import cumsum
 from math import pi
 
@@ -148,17 +149,17 @@ class Stock:
         sns.lineplot(x="Date", y="Close", data = dat[dat["Date"] >= start.strftime('%Y-%m-%d')],
                      err_style="bars")
 
-        plt.savefig(r"C:\Users\stano\Documents\Projects\Stock Portfolio\static\stock.jpg")
+        plt.savefig(r"C:\Users\stano\Documents\Projects\Stock Portfolio Tracker and Forecaster\static\stock.jpg")
         pass
 
     def make_Predictions(self) -> float:
         return get_Predictions(self.data)
 
 class Portfolio:
-    def __init__(self, stock_list = [], transactions = [], net_worth = 0):
+    def __init__(self, stock_list = [], transactions = pd.DataFrame({"Stock":[], "Date Added":[], "Shares" : []}), net_worth = 0):
         self.stock_list = stock_list # List of stock objects 
         # self.inactive_stocks = []
-        self.transactions = transactions # List of transactions 
+        self.transactions = transactions # Pandas dataframe representing transactions 
         self.net_worth = net_worth # Total assets invested in the portfolio 
     def numStocks(self):
         return len(self.to_list())
@@ -212,9 +213,16 @@ class Portfolio:
 
         self.stock_list.append(stock)
 
-        self.transactions.append(str(stock))
+        purchasePrice = stock.data.loc[invest_dt].iloc[3] * num_shares
 
-        self.net_worth += stock.netProfit()
+        new_trans = pd.DataFrame([[stock.ticker, invest_dt, num_shares]], columns=self.transactions.columns)
+
+        new = pd.concat([new_trans, self.transactions], ignore_index=True)
+        self.transactions = new
+
+        print(self.transactions)
+
+        self.net_worth += stock.getPriceAtDate()
 
         pass
 
@@ -255,6 +263,52 @@ class Portfolio:
         for st in self.stock_list:
             worth += st.get_Curr_Value()
         return worth
+    
+    def netChange(self, compare="initial") -> float:
+        initial = 0
+        current = 0
+        if compare == "initial":
+            for s in self.stock_list:
+                initial += sum(s.getPurchasePrices())
+                current += s.getPriceAtDate()
+        elif compare == "last":
+            for s in self.stock_list:
+                initial += s.getPriceAtDate(s.data.iloc[-2].name)
+                current += s.getPriceAtDate()
+        return 100 * ((current - initial) / initial)
+    
+    def getTransactionTable(self) -> object:
+        
+        transaction_CDS = ColumnDataSource(self.transactions)
+
+        columns = [
+                TableColumn(field="Stock", title="Stock"), 
+                TableColumn(field="Date Added", formatter=DateFormatter()),
+                TableColumn(field="Shares")
+            ]
+
+        table = DataTable(source=transaction_CDS, columns=columns)
+
+        table_style = InlineStyleSheet(css=           
+            """
+            .slick-header-columns {
+                background-color: #000000 !important;
+                font-family: arial;
+                font-weight: bold;
+                font-size: 12pt;
+                color: #FFFFFF;
+                text-align: right;
+            }
+            .slick-row {
+                font-size: 16pt;
+                font-family: arial;
+                text-align: right;
+            }
+        """)
+
+        table.stylesheets = [table_style]
+
+        return table
 
     #Visualizes the total profit from this portfolio over time (starting from earliest stock in portfolio)
     def visualize_Profits(self):
@@ -291,8 +345,6 @@ class Portfolio:
         stock_pct['Value_str'] = stock_pct['Value_str'].str.pad(20, side="left")
         pct_cds = ColumnDataSource(stock_pct)
 
-        print(stock_pct)
-
         # stocks_profit_pct = pd.DataFrame()
         # for stock in self.stock_list:
         #     stocks_profit_pct[stock.ticker] = stock_recents[stock.ticker] / stock_recents["Total Value"]
@@ -309,6 +361,8 @@ class Portfolio:
 
         p1.add_layout(low_box)
         p1.add_layout(high_box)
+        p1.width=900
+        p1.height=500
 
         p2 = figure(title = "Investment History", x_axis_label = "Date", y_axis_label = "Portfolio Value", x_axis_type = "datetime")
         p2.varea_stack(stackers = stock_values.drop(columns=["Date"]).columns, x = "Date", color = viridis(len(self.to_list())), legend_label= self.to_list(), source=stock_values)
@@ -316,8 +370,10 @@ class Portfolio:
         p2.yaxis[0].formatter = NumeralTickFormatter(format="$0")
         p2.xaxis[0].formatter = DatetimeTickFormatter(months="%b %Y")
         p2.legend.orientation = "horizontal"
+        p2.height=500
+        p2.width=900
 
-        p3 = figure(x_range = (-0.5, 1.0), title="Portfolio Performance", tools="hover", tooltips = "@Stock: @Value")
+        p3 = figure(x_range = (-0.5, 1.0), title="Portfolio Overview", tools="hover", tooltips = "@Stock: @Value")
         p3.wedge(x = 0, y = 1, radius=0.4, start_angle=cumsum('Angle', include_zero=True), end_angle = cumsum('Angle'), line_color="white", fill_color="Color", source=stock_pct, legend_field="Stock")
 
         labels = LabelSet(x=0, y=1, text='Value_str', angle=cumsum('Angle', include_zero=True), source=pct_cds)
@@ -326,8 +382,18 @@ class Portfolio:
         p3.axis.axis_label=None
         p3.axis.visible=False
         p3.grid.grid_line_color=None
+        p3.height=500
 
-        script, div = components({"Profit Line" : p1, "Investment History" : p2, "Portfolio Performance" : p3})
+        p4 = self.getTransactionTable()
+        p4.width = 600
+        p4.height=500
+
+        p5 = figure(title="Stock Performance ROIs")
+
+        p5.width= 600
+        p5.height= 300
+
+        script, div = components({"Profit Line" : p1, "Investment History" : p2, "Portfolio Overview" : p3, "Data Table": p4, "Bar" : p5})
 
         return script, div
 
@@ -406,8 +472,11 @@ def run():
 
 # pf.add_Stock("AMZN", "2022-02-01", 1)
 
+# pf.add_Stock("NVDA", "2023-03-04", 2.3)
+
 # pf.visualize_Profits()
-# aapl = pf.get_stock("AAPL").profitsData()
+# aapl = pf.get_stock("AAPL")
+# print(aapl.data.iloc[-2].name)
 # amzn = pf.get_stock("AMZN").profitsData()
 
 # print(aapl)
