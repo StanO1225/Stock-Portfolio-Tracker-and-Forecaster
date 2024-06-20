@@ -13,3 +13,5 @@ This Python project offers a comprehensive stock portfolio tracker with visualiz
 **Limitations:** The current version has limitations, such as the inability to add more shares to an existing stock and removing stock shares.
 
 The project aims to provide users with insights into their stock portfolio's performance, predictions, and trends using historical data and predictive modeling. The code is organized into classes for Stocks and Portfolios, promoting modularity and scalability.
+
+https://www.loom.com/share/e0b1aaf46d5d4817a8482ebca265dd58?sid=0ea115bf-eaf5-4711-bc5d-52335984503b
