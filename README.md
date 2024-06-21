@@ -1,17 +1,18 @@
 # Stock-Portfolio-Tracker/Predictor
 
-This Python project offers a comprehensive stock portfolio tracker with visualization and predictive capabilities. The project utilizes the Yahoo Finance API (yfinance) to fetch historical stock data for a given ticker. The system allows users to input stocks in the format "Ticker Share_Count YYYY-MM-DD" and tracks their portfolio's performance over time. Key features include:
+This stock portfolio tracker web application is a way for users to keep track of their stock portfolio, offering a personalized dashboard for users to have a comprehensive overview of their portfolio history. The app is built using python, flask, and HTML/CSS. The statistical visualizations are made using Bokeh and the stock data is from the yfinance package. 
 
-**Portfolio Tracking:** The system keeps track of each stock's performance in the portfolio, including initial investment value, current value, and net profit/loss.
+To use the app, just enter a stock ticker, a date, and how many shares of the stock was purchased. 
 
-**Portfolio Visualization:** The system provides visualization tools to showcase the performance of individual stocks and the entire portfolio over time. It plots both actual and predicted stock prices, helping users gauge the effectiveness of the predictive model.
+## Demo:
+https://github.com/StanO1225/Stock-Portfolio-Tracker-and-Forecaster/assets/115967184/c202551e-2abf-4712-8184-52d152e54518
 
-**Predictive Modeling:** The project implements a neural network predictive model using TensorFlow and LSTM layers to forecast future stock prices. The model takes historical data as input and provides predictions for the next day's closing price.
+## Future Updates:  
 
-**Interactive Interface:** The program offers an interactive command-line interface where users can request stock predictions, view transaction history, calculate total net profit, and visualize portfolio profits.
+Portfolio Forecasting : The project implements a neural network predictive model using TensorFlow and LSTM layers to forecast future stock prices. The model takes historical data as input and provides predictions for the next day's closing price. These predictions will be used as a way to forecase portfolio performance. 
 
-**Limitations:** The current version has limitations, such as the inability to add more shares to an existing stock and removing stock shares.
+Data Processing: Add method to enable users to upload and export stock data so users do not have to enter their portfolio each time. 
 
-The project aims to provide users with insights into their stock portfolio's performance, predictions, and trends using historical data and predictive modeling. The code is organized into classes for Stocks and Portfolios, promoting modularity and scalability.
+Live Stock Info: By integrating a stock price api that allows for real time stock data, the tracker will be able to make real time updates. 
 
-https://www.loom.com/share/e0b1aaf46d5d4817a8482ebca265dd58?sid=0ea115bf-eaf5-4711-bc5d-52335984503b
+
