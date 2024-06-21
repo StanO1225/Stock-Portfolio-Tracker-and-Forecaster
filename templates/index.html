@@ -24,7 +24,7 @@
 <body class="body">
     <div class="title"> 
         Stock Portfolio Tracker
-        <button type="submit"></button>
+        <!-- <button type="submit"></button> -->
     </div>
 
     <form method="POST">
@@ -80,23 +80,30 @@
             <div class="metricBox">
                 <div class="metricHead"> (ROI) </div>
                 <div class="metricStat">
-                    {{ netChange }}
+                    {{ "%.2f"|format(netChange) }}%
                 </div>
+                {% if netChange > 0 %}
+                <div class="triangle-green"></div>
+                {% elif netChange < 0 %}
+                    <div class="triangle-red"></div>
+                {% endif %}
             </div>
 
             <div class="metricBox">
                 <div class="metricHead"> Daily Change </div>
                 <div class="metricStat">
-                    {{ dayChange }}
+                    {{ "%.2f"|format(dayChange) }}%
                 </div>
-                
-                <div class="triangle-green"> </div>
+
+                {% if dayChange > 0 %}
+                    <div class="triangle-green"></div>
+                {% elif dayChange < 0 %}
+                    <div class="triangle-red"></div>
+                {% endif %}
             </div>
             
 
-            <div class="metricBox"> 
-    
-            </div>
+            <div> </div>
         </div>
         
 

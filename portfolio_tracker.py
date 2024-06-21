@@ -83,7 +83,7 @@ class Stock:
 
         return price * self.getShares(date)
 
-    def netProfit(self, date=None) -> float:
+    def netProfit(self, date=None, percent=False) -> float:
         """
         Returns net profit/loss from this stock from dates of investment to date given. 
         """
@@ -94,7 +94,13 @@ class Stock:
         for v in self.getPurchasePrices(date):
             investments += v
 
-        return self.getPriceAtDate(date) - investments # Current total value of stocks - Total invested initially 
+        if percent:
+            res = (self.getPriceAtDate(date) - investments) / investments
+        else:
+            res = self.getPriceAtDate(date) - investments
+
+        return res
+
 
     def addShares(self, date: str, num_shares) -> None:
         """
@@ -149,7 +155,7 @@ class Stock:
         sns.lineplot(x="Date", y="Close", data = dat[dat["Date"] >= start.strftime('%Y-%m-%d')],
                      err_style="bars")
 
-        plt.savefig(r"C:\Users\stano\Documents\Projects\Stock Portfolio Tracker and Forecaster\static\stock.jpg")
+        # plt.savefig(r"C:\Users\stano\Documents\Projects\Stock Portfolio Tracker and Forecaster\static\stock.jpg")
         pass
 
     def make_Predictions(self) -> float:
@@ -220,8 +226,6 @@ class Portfolio:
         new = pd.concat([new_trans, self.transactions], ignore_index=True)
         self.transactions = new
 
-        print(self.transactions)
-
         self.net_worth += stock.getPriceAtDate()
 
         pass
@@ -267,6 +271,7 @@ class Portfolio:
     def netChange(self, compare="initial") -> float:
         initial = 0
         current = 0
+
         if compare == "initial":
             for s in self.stock_list:
                 initial += sum(s.getPurchasePrices())
@@ -275,6 +280,7 @@ class Portfolio:
             for s in self.stock_list:
                 initial += s.getPriceAtDate(s.data.iloc[-2].name)
                 current += s.getPriceAtDate()
+
         return 100 * ((current - initial) / initial)
     
     def getTransactionTable(self) -> object:
@@ -309,8 +315,12 @@ class Portfolio:
         table.stylesheets = [table_style]
 
         return table
-
-    #Visualizes the total profit from this portfolio over time (starting from earliest stock in portfolio)
+    
+    """
+    Manipulates data to prepare for plotting. 
+    Creates various plots used for the portfolio webpage. 
+    Uses the bokeh components function to create elements to embed into webpage. 
+    """
     def visualize_Profits(self):
         all_profits = pd.DataFrame(data = {"Date":[]})
         stock_values = pd.DataFrame(data = {"Date":[]})
@@ -345,11 +355,14 @@ class Portfolio:
         stock_pct['Value_str'] = stock_pct['Value_str'].str.pad(20, side="left")
         pct_cds = ColumnDataSource(stock_pct)
 
-        # stocks_profit_pct = pd.DataFrame()
-        # for stock in self.stock_list:
-        #     stocks_profit_pct[stock.ticker] = stock_recents[stock.ticker] / stock_recents["Total Value"]
+        stock_unique = self.to_list()
 
-        # stocks_profit_pct = ColumnDataSource(stocks_profit_pct)
+        stocks_profit_pct = []
+        for tick in stock_unique:
+            stock = self.get_stock(tick)
+            stocks_profit_pct.append(100 * stock.netProfit(percent=True))
+
+        stock_roi = ColumnDataSource(data=dict(Stock=stock_unique, ROI=stocks_profit_pct, Color=viridis(self.numStocks())))
 
         low_box = BoxAnnotation(top = 0, fill_alpha=0.15, fill_color="red")
         high_box = BoxAnnotation(bottom = 0, fill_alpha = 0.15, fill_color="green")
@@ -388,7 +401,13 @@ class Portfolio:
         p4.width = 600
         p4.height=500
 
-        p5 = figure(title="Stock Performance ROIs")
+
+        minrange = 0
+        if min(stocks_profit_pct) < 0 :
+            minrange=min(stocks_profit_pct) - 10
+
+        p5 = figure(x_range=stock_unique, y_range = (minrange, max(stocks_profit_pct) + 10), title="Stock Performance ROIs")
+        p5.vbar(x="Stock", top="ROI", color="Color", width=0.9, legend_label="Stock", source=stock_roi)
 
         p5.width= 600
         p5.height= 300
@@ -397,72 +416,8 @@ class Portfolio:
 
         return script, div
 
-    def graphLine():
-        pass
-
-    def graphProfits():
-        pass
-
-    def graphInvestments():
-        pass
-
-    def graphBreakdown():
-        pass
-
     def getTransactions(self):
         return self.transactions
-
-    def process_Request(self):
-        while (1):
-            print("Enter your request. For a list of options enter 'Help': ")
-            line = input().lower()
-            
-            match line:
-                case "help":
-                    pass
-                case "predict":
-                    req = input("Enter a stock ticker: \n")
-                    st = self.get_stock(req)
-                    print(st.make_Predictions())
-                case "history":
-                    print(self.getTransactions())
-                case "profit":
-                    print("$ " + str(self.calc_Net_Profit()))
-                case "q":
-                    return
-                case "v":
-                    req = input("Enter a stock ticker: \n")
-                    st = self.get_stock(req)
-                    # while not st is None:
-                    #     st = self.get_stock(input("Stock not in portfolio, enter again:"))
-                    st.visualize_Stock()
-        pass
-
-def run():
-    line = None
-    pf = Portfolio()
-
-    #Continuously asks for stock input until user is done
-    while True:
-        print("Enter a stock in the format Format: 'Ticker Share_Count YYYY-MM-DD' or enter 'Done'.")
-        line = input("Stock: ")
-
-        if line.lower() == "done":
-            break
-
-        #Fetches tick + shares from input 
-        stock_input = line.split()
-        tick = stock_input[0].upper()
-        shares = float(stock_input[1])
-        date = stock_input[2]
-        
-        #Creates stock object and adds to portfolio
-        pf.add_Stock(tick, date, shares)
-        pf.getTransactions()
-
-    # pf.visualize_Profits()
-
-    pf.process_Request()
 
 # pf = Portfolio()
 

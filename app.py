@@ -47,6 +47,6 @@ def main():
         #     logging.error(traceback.format_exc())            
         #     error = f"ERROR: An error occurred when processing your request."
 
-    return render_template("index.html", script=script, line_div=plot1, varea=plot2, pie= plot3, table=plot4, bar=plot5, marketVal=f"{pf.net_worth:.2f}", numStocks=pf.numStocks(), error=error, netChange=f"{netChange:.2f}%", dayChange=f"{dayChange:.2f}%")
+    return render_template("index.html", script=script, line_div=plot1, varea=plot2, pie= plot3, table=plot4, bar=plot5, marketVal=f"{pf.net_worth:.2f}", numStocks=pf.numStocks(), error=error, netChange=netChange, dayChange=dayChange)    
 
 app.run(host = "0.0.0.0", port = 8000, debug=True)

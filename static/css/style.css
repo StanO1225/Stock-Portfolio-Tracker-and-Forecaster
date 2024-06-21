@@ -105,29 +105,73 @@
     text-align: center; 
 }
 
-.submit
-{
-    background-color: #5F8575;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.5s;
-    box-sizing: content-box;
-    height: 30px;
+.submit {
+  appearance: none;
+  background-color: #2ea44f;
+  border: 1px solid rgba(27, 31, 35, .15);
+  border-radius: 6px;
+  box-shadow: rgba(27, 31, 35, .1) 0 1px 0;
+  box-sizing: border-box;
+  color: #fff;
+  cursor: pointer;
+  display: inline-block;
+  font-family: -apple-system,system-ui,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji";
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 14px;
+  padding: 6px 16px;
+  position: relative;
+  text-align: center;
+  text-decoration: none;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  vertical-align: middle;
+  white-space: nowrap;
+}
 
+.submit:focus:not(:focus-visible):not(.focus-visible) {
+  box-shadow: none;
+  outline: none;
+}
+
+.submit:hover {
+  background-color: #2c974b;
+}
+
+.submit:focus {
+  box-shadow: rgba(46, 164, 79, .4) 0 0 0 3px;
+  outline: none;
+}
+
+.submit:disabled {
+  background-color: #94d3a2;
+  border-color: rgba(27, 31, 35, .1);
+  color: rgba(255, 255, 255, .8);
+  cursor: default;
+}
+
+.submit:active {
+  background-color: #298e46;
+  box-shadow: rgba(20, 70, 32, .2) 0 1px 0 inset;
 }
 
 .triangle-green {
-	width: 0;
-	height: 0;
+	width: 0px;
+	height: 0px;
 	border-left: 14px solid transparent;
 	border-right: 14px solid transparent;
 	border-bottom: 28px solid green;
+    display: flex;
+    margin: 0 auto;
 }
 
-.triangle-red{
-	width: 0;
-	height: 0;
-	border-left: 25px solid transparent;
-	border-right: 25px solid transparent;
-	border-bottom: 50px solid red;
+.triangle-red {
+	width: 0px;
+	height: 0px;
+	border-left: 14px solid transparent;
+	border-right: 14px solid transparent;
+	border-top: 28px solid red;
+    display: flex;
+    margin: 0 auto;
 }
